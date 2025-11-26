@@ -1,32 +1,8 @@
-name: Autograding Tests
-on:
-  - push
-  - repository_dispatch
-permissions:
-  checks: write
-  actions: read
-  contents: read
-jobs:
-  run-autograding-tests:
-    runs-on: ubuntu-latest
-    if: github.actor != 'github-classroom[bot]'
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.10"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest
-    - name: Run tests
-      id: tests
-      run: pytest hw01.py --junitxml=report.xml # Capture JUnit XML report
-    - name: Autograding Reporter
-      uses: classroom-resources/autograding-grading-reporter@v1
-      env:
-        # Pass the JUnit XML report file to the reporter
-        JUNIT_REPORTS: report.xml
-      if: always()
+- name: tests
+  setup: ''
+  run: python -m pytest -q
+  input: ''
+  output: ''
+  comparison: included
+  timeout: 10
+  points: null
