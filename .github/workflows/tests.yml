@@ -1,8 +1,5 @@
-- name: tests
-  setup: ''
-  run: python -m pytest tests/test_hw01.py -v
-  input: ''
-  output: ''
-  comparison: included
+ name: Run Pytest
+  setup: python -m pip install pytest
+  run: python -m pytest tests/test_hw01.py -xvs
   timeout: 10
-  points: 10
+  points: null
