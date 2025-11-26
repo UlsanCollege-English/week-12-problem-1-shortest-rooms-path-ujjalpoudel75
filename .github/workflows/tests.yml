@@ -1,5 +1,5 @@
 name: Autograding Tests
-'on':
+on:
   - push
   - repository_dispatch
 permissions:
@@ -23,9 +23,10 @@ jobs:
         pip install pytest
     - name: Run tests
       id: tests
-      run: pytest hw01.py
+      run: pytest hw01.py --junitxml=report.xml # Capture JUnit XML report
     - name: Autograding Reporter
       uses: classroom-resources/autograding-grading-reporter@v1
       env:
-        TEST_RESULTS: "${{ steps.tests.outcome }}"
+        # Pass the JUnit XML report file to the reporter
+        JUNIT_REPORTS: report.xml
       if: always()

@@ -102,7 +102,7 @@ def test_larger_graph_min_hops():
     assert is_valid_path(graph, path, "R1", "R7")
     # FIX: The shortest path in this specific graph is actually 4 hops (R1-R2-R4-R6-R7)
     # The original test expected 3, which is impossible with these connections.
-    assert path_length(path) == 4 
+    assert path_length(path) == 4
 
 @pytest.mark.parametrize(
     "start,goal,expected_len",
