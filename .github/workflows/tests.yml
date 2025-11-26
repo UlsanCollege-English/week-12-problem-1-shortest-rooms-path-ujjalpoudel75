@@ -1,8 +1,8 @@
 - name: tests
   setup: ''
-  run: python -m pytest -q
+  run: python -m pytest tests/test_hw01.py -v
   input: ''
   output: ''
   comparison: included
   timeout: 10
-  points: null
+  points: 10

@@ -14,77 +14,44 @@ def bfs_shortest_path(graph, start, goal):
         List of rooms from start to goal (shortest path), or [] if no path exists
     """
     
-    # Step 1: Read & Understand
-    # We need to find the shortest path between two nodes in an unweighted graph
-    # using Breadth-First Search (BFS).
-    
-    # Step 2: Re-phrase
-    # "Find a path with the fewest edges from start to goal using layer-by-layer search."
-    
-    # Step 3: Identify Input / Output / Variables
-    # Inputs: graph (dict), start (string), goal (string)
-    # Output: path (list of strings)
-    # Main data structures: queue (deque), visited (set), parent (dict)
-    
-    # Step 4: Break Down the Problem
-    # - Use a queue to explore rooms level by level
-    # - Mark rooms as visited to avoid cycles
-    # - Track parent relationships to reconstruct the path
-    # - Handle edge cases: start == goal, missing nodes, disconnected graph
-    
-    # Step 5: Pseudocode
-    # 1. Check if start or goal is not in graph -> return []
-    # 2. If start == goal -> return [start]
-    # 3. Initialize queue with start, visited set, and parent dict
-    # 4. While queue is not empty:
-    #    - Dequeue current room
-    #    - For each neighbor:
-    #      - If not visited and in graph:
-    #        - Mark as visited
-    #        - Record parent
-    #        - Enqueue neighbor
-    #        - If neighbor is goal, reconstruct path and return
-    # 5. If goal not reached, return []
-    
-    # Step 6: Write the Code
-    
-    # Edge case: start or goal not in graph
-    if start not in graph or goal not in graph:
-        return []
-    
     # Edge case: start equals goal
     if start == goal:
         return [start]
     
-    # Initialize BFS data structures
-    queue = deque([start])
-    visited = {start}
-    parent = {}
+    # Edge case: start not in graph (no neighbors to explore from)
+    if start not in graph:
+        return []
     
-    # BFS traversal
+    # Initialize BFS data structures
+    queue = deque([start])  # Queue for BFS traversal
+    visited = {start}        # Set of visited nodes
+    parent = {}              # Dictionary to track parent of each node for path reconstruction
+    
+    # BFS traversal - explore level by level
     while queue:
-        current = queue.popleft()
+        current = queue.popleft()  # Get next room to explore
         
-        # Explore all neighbors
-        for neighbor in graph[current]:
+        # Explore all neighbors of current room
+        for neighbor in graph.get(current, []):
             if neighbor not in visited:
+                # Mark neighbor as visited and record its parent
                 visited.add(neighbor)
                 parent[neighbor] = current
                 
-                # Found the goal
+                # Check if we found the goal
                 if neighbor == goal:
                     # Reconstruct path by walking backward from goal to start
                     path = []
                     node = goal
-                    while node != start:
+                    while node in parent:
                         path.append(node)
                         node = parent[node]
                     path.append(start)
-                    path.reverse()
+                    path.reverse()  # Reverse to get path from start to goal
                     return path
                 
+                # Add neighbor to queue for further exploration
                 queue.append(neighbor)
     
-    # No path found
+    # No path found (goal is unreachable or doesn't exist)
     return []
-
