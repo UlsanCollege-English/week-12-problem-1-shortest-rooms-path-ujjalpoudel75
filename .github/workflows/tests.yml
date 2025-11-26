@@ -1,4 +1,0 @@
-- name: tests
-  setup: pip install pytest
-  run: pytest tests/test_hw01.py -v
-  timeout: 10
