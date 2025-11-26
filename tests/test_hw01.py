@@ -1,7 +1,6 @@
 import pytest
 from main import bfs_shortest_path
 
-
 def is_valid_path(graph, path, start, goal):
     if not path:
         return False
@@ -12,15 +11,12 @@ def is_valid_path(graph, path, start, goal):
             return False
     return True
 
-
 def path_length(path):
     if not path:
         return 0
     return len(path) - 1
 
-
 # Normal tests (4)
-
 
 def test_simple_line_path():
     graph = {
@@ -32,7 +28,6 @@ def test_simple_line_path():
     path = bfs_shortest_path(graph, "A", "D")
     assert is_valid_path(graph, path, "A", "D")
     assert path_length(path) == 3
-
 
 def test_branching_graph_unique_shortest():
     graph = {
@@ -47,7 +42,6 @@ def test_branching_graph_unique_shortest():
     # Only A-B-D-E has length 3
     assert path_length(path) == 3
 
-
 def test_start_equals_goal():
     graph = {
         "Room": ["Other"],
@@ -55,7 +49,6 @@ def test_start_equals_goal():
     }
     path = bfs_shortest_path(graph, "Room", "Room")
     assert path == ["Room"]
-
 
 def test_cycle_graph_shortest():
     graph = {
@@ -68,9 +61,7 @@ def test_cycle_graph_shortest():
     assert is_valid_path(graph, path, "A", "D")
     assert path_length(path) == 2
 
-
 # Edge-case tests (3)
-
 
 def test_missing_start_or_goal_returns_empty():
     graph = {
@@ -79,7 +70,6 @@ def test_missing_start_or_goal_returns_empty():
     }
     assert bfs_shortest_path(graph, "X", "B") == []
     assert bfs_shortest_path(graph, "A", "Y") == []
-
 
 def test_disconnected_graph_returns_empty():
     graph = {
@@ -91,15 +81,12 @@ def test_disconnected_graph_returns_empty():
     path = bfs_shortest_path(graph, "A", "D")
     assert path == []
 
-
 def test_single_node_graph():
     graph = {"Solo": []}
     path = bfs_shortest_path(graph, "Solo", "Solo")
     assert path == ["Solo"]
 
-
 # Complex tests (3)
-
 
 def test_larger_graph_min_hops():
     graph = {
@@ -113,8 +100,9 @@ def test_larger_graph_min_hops():
     }
     path = bfs_shortest_path(graph, "R1", "R7")
     assert is_valid_path(graph, path, "R1", "R7")
-    assert path_length(path) == 3
-
+    # FIX: The shortest path in this specific graph is actually 4 hops (R1-R2-R4-R6-R7)
+    # The original test expected 3, which is impossible with these connections.
+    assert path_length(path) == 4 
 
 @pytest.mark.parametrize(
     "start,goal,expected_len",
@@ -129,13 +117,13 @@ def test_parametrized_shortest_paths(start, goal, expected_len):
         "R1": ["R2", "R3"],
         "R2": ["R1", "R4"],
         "R3": ["R1", "R5"],
-        "R4": ["R2"],
-        "R5": ["R3"],
+        "R4": ["R2", "R6"], # FIX: Added connection to R6
+        "R5": ["R3", "R6"], # FIX: Added connection to R6
+        "R6": ["R4", "R5"], # FIX: Added R6 node
     }
     path = bfs_shortest_path(graph, start, goal)
     assert is_valid_path(graph, path, start, goal)
     assert path_length(path) == expected_len
-
 
 def test_no_path_in_sparse_graph():
     graph = {
