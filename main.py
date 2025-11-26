@@ -1,77 +1,73 @@
 from collections import deque
 
 def bfs_shortest_path(graph, start, goal):
-    # ==========================================
-    # Step 1: Read & Understand
-    # We need to find the shortest path between two rooms in a museum.
-    # Since edges are unweighted, BFS is the correct algorithm.
+    """
+    Finds the shortest path between two nodes in a graph using Breadth-First Search.
 
-    # Step 2: Re-phrase
-    # Find a list of nodes connecting 'start' to 'goal' with the minimum number of edges.
+    Args:
+        graph (dict): A dictionary representing the graph where keys are nodes and values are lists of neighbors.
+        start (str): The starting node.
+        goal (str): The goal node.
 
-    # Step 3: Identify Input / Output / Variables
-    # Input: graph (dict), start (str), goal (str)
-    # Output: list of strings (path) or []
-    # Variables: queue (for BFS), visited (set), parent (dict)
+    Returns:
+        list: A list representing the shortest path from start to goal, or an empty list if no path exists or if start/goal are not in the graph.
+    """
 
-    # Step 4: Break Down the Problem
-    # 1. Check edge cases (start/goal missing, start==goal).
-    # 2. Loop with a queue.
-    # 3. Track parents to rebuild the path later.
+    # 1. Read & Understand:
+    # Find the shortest sequence of rooms (nodes) from a start room to a target room in a museum (graph).
 
-    # Step 5: Pseudocode
-    # If start/goal not in graph -> return []
-    # If start == goal -> return [start]
-    # Queue = [start], Visited = {start}, Parent = {start: None}
-    # While Queue not empty:
-    #   Curr = pop()
-    #   If Curr == Goal -> Stop
-    #   For neighbor in graph[Curr]:
-    #     If not visited -> Add to Queue, Mark Visited, Record Parent
-    # Rebuild path from Goal back to Start using Parent dict.
-    # ==========================================
+    # 2. Re-phrase:
+    # Find a path with the fewest edges from start to goal.
 
-    # Step 6: Write the Code
+    # 3. Identify Input / Output / Variables:
+    # Inputs: graph, start, goal
+    # Output: path list
+    # Main data structures: queue, visited, parent
 
-    # Edge Case: Start or Goal does not exist in the graph
+    # 4. Break Down the Problem:
+    # - Pick the next room using a queue (FIFO).
+    # - Avoid visiting rooms twice using a set.
+    # - Remember the path using a parent dictionary.
+
+    # 5. Pseudocode:
+    # - If start or goal not in graph, return [].
+    # - Initialize queue with start.
+    # - Initialize visited set with start.
+    # - Initialize parent dictionary.
+    # - While queue is not empty:
+    #   - Dequeue a node.
+    #   - If node is the goal, reconstruct and return the path.
+    #   - For each neighbor of the node:
+    #     - If neighbor not in visited:
+    #       - Add neighbor to visited.
+    #       - Enqueue neighbor.
+    #       - Set parent of neighbor to node.
+    # - If goal not reached, return [].
+
+    # 6. Write the Code:
     if start not in graph or goal not in graph:
         return []
 
-    # Edge Case: Start is the Goal
-    if start == goal:
-        return [start]
-
-    # Initialize BFS structures
     queue = deque([start])
     visited = {start}
-    parent = {start: None}
-    
-    found = False
+    parent = {}
 
-    # Standard BFS Loop
     while queue:
-        current_room = queue.popleft()
+        node = queue.popleft()
 
-        if current_room == goal:
-            found = True
-            break
+        if node == goal:
+            # Reconstruct path
+            path = []
+            while node is not None:
+                path.append(node)
+                node = parent.get(node)
+            return path[::-1]  # Reverse the path
 
-        # Check neighbors
-        # We use .get() just in case a neighbor listed isn't a key in the dict
-        for neighbor in graph.get(current_room, []):
+        for neighbor in graph.get(node, []):
             if neighbor not in visited:
                 visited.add(neighbor)
-                parent[neighbor] = current_room
                 queue.append(neighbor)
+                parent[neighbor] = node
 
-    # Step 7: Debug / Step 8: Optimize
-    # Reconstruct path by backtracking from goal to start
-    if found:
-        path = []
-        curr = goal
-        while curr is not None:
-            path.append(curr)
-            curr = parent[curr]
-        return path[::-1] # Reverse to get Start -> Goal
-    else:
-        return []
+    # 7. Debug & 8. Optimize:
+    return []
