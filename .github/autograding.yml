@@ -1,0 +1,81 @@
+on:
+  push:
+  repository_dispatch:
+
+name: Autograding Tests
+
+permissions:
+  checks: write
+  actions: read
+  contents: read
+
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run tests (autograder action)
+        id: tests
+        uses: classroom-resources/autograding-python-grader@v1
+        with:
+          timeout: 10
+          setup-command: 'pip install pytest'
+
+      - name: Debug: show tests action outputs and workspace
+        run: |
+          echo "=== steps.tests.outputs as JSON ==="
+          echo "${{ toJson(steps.tests.outputs) }}"
+          echo "=== End outputs ==="
+          echo ""
+          echo "PWD: $(pwd)"
+          echo "Listing top-level files:"
+          ls -la
+          echo ""
+          echo "Searching for candidate result files (json/xml) up to depth 4:"
+          find . -maxdepth 4 -type f \( -name 'results*.json' -o -name '*.json' -o -name '*.xml' -o -name 'report*.json' \) -print || true
+          echo ""
+          for f in $(find . -maxdepth 4 -type f \( -name 'results*.json' -o -name '*.json' -o -name '*.xml' -o -name 'report*.json' \) -print); do
+            echo "---- $f (first 200 lines) ----"
+            sed -n '1,200p' "$f" || true
+            echo "---- end ----"
+          done
+
+      - name: Generate results.json via pytest (guarantee a JSON result file)
+        id: generate_json
+        continue-on-error: true
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-json-report >/dev/null
+          # Run pytest to create a machine-readable results.json even if tests fail.
+          # We allow failure (continue-on-error) because we only want the JSON output for the reporter.
+          pytest --json-report --json-report-file=results.json || true
+          if [ -f results.json ]; then
+            echo "results.json created"
+            head -n 200 results.json || true
+          else
+            echo "results.json not found"
+          fi
+
+      - name: Load results.json into step output
+        id: load_results
+        run: |
+          if [ -f results.json ]; then
+            # Write the full JSON into the GITHUB_OUTPUT as the 'result' output
+            echo "result<<EOF" >> $GITHUB_OUTPUT
+            cat results.json >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            # Keep result empty if file missing
+            echo "result=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Autograding Reporter
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          # Pass the JSON results (either from the autograder action or from pytest results.json)
+          TESTS_RESULTS: "${{ steps.load_results.outputs.result }}"
+        with:
+          runners: tests
